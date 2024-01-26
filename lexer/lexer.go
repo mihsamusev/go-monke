@@ -1,7 +1,6 @@
 package lexer
 
 import (
-	"fmt"
 	"monke/token"
 	"unicode"
 )
@@ -50,6 +49,18 @@ func (l *Lexer) NextToken() token.Token {
             tok = newToken(token.ASSIGN, l.ch)
         case '+':
             tok = newToken(token.PLUS, l.ch)
+        case '-':
+            tok = newToken(token.MINUS, l.ch)
+        case '*':
+            tok = newToken(token.ASTERISK, l.ch)
+        case '/':
+            tok = newToken(token.SLASH, l.ch)
+        case '!':
+            tok = newToken(token.BANG, l.ch)
+        case '<':
+            tok = newToken(token.LT, l.ch)
+        case '>':
+            tok = newToken(token.GT, l.ch)
         case ',':
             tok = newToken(token.COMMA, l.ch)
         case ';':
@@ -66,11 +77,10 @@ func (l *Lexer) NextToken() token.Token {
             tok.Type = token.EOF
             tok.Literal = ""
         default:
-            if token.IsIdentLetter((l.ch)) {
+            if token.IsIdentByte(l.ch) {
                 literal := l.readIdent()
                 tok.Type = token.LookupIdent(literal)
                 tok.Literal = literal
-                fmt.Printf("POS: %v, LITERAL: %v\n", l.position, literal)
                 return tok
 
             } else if unicode.IsDigit(rune(l.ch)) {
@@ -88,7 +98,7 @@ func (l *Lexer) NextToken() token.Token {
 
 func (l *Lexer) readIdent() string {
     identStart := l.position
-    for token.IsIdentLetter(l.ch) {
+    for token.IsIdentByte(l.ch) {
         l.readChar()
     }
     return l.input[identStart:l.position]

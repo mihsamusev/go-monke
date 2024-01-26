@@ -19,6 +19,12 @@ const (
 	// Operators
 	ASSIGN = "="
 	PLUS   = "+"
+    MINUS  = "-"
+    ASTERISK = "*"
+    SLASH    = "/"
+    LT   = "<"
+    GT   = ">"
+    BANG      = "!"
 
 	// Delimiters
 	COMMA     = ","
@@ -47,6 +53,6 @@ func LookupIdent(ident string) TokenType {
 }
 
 
-func IsIdentLetter(ch byte) bool {
+func IsIdentByte(ch byte) bool {
     return (ch == '_') || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
 }
