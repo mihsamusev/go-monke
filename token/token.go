@@ -47,6 +47,6 @@ func LookupIdent(ident string) TokenType {
 }
 
 
-func IsLetter(ch byte) bool {
+func IsIdentLetter(ch byte) bool {
     return (ch == '_') || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
 }

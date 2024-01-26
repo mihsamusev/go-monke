@@ -1,7 +1,6 @@
 package lexer
 
 import (
-	"bytes"
 	"fmt"
 	"monke/token"
 	"unicode"
@@ -29,12 +28,13 @@ func (l *Lexer) readChar() {
 
     l.position = l.readPosition;
     l.readPosition += 1;
+}
 
-    if unicode.IsSpace(rune(l.ch)) {
+func (l *Lexer) skipWhitespace() {
+    for unicode.IsSpace(rune(l.ch)) {
         l.readChar()
     }
 }
-
 func newToken(tokenType token.TokenType, c byte) token.Token {
     return token.Token{
         Type: tokenType,
@@ -42,8 +42,9 @@ func newToken(tokenType token.TokenType, c byte) token.Token {
     }
 }
 func (l *Lexer) NextToken() token.Token {
-    var tok token.Token
+    l.skipWhitespace()
 
+    var tok token.Token
     switch l.ch {
         case '=':
             tok = newToken(token.ASSIGN, l.ch)
@@ -65,31 +66,18 @@ func (l *Lexer) NextToken() token.Token {
             tok.Type = token.EOF
             tok.Literal = ""
         default:
-            if unicode.IsLetter(rune(l.ch)) {
-                // accumulate while is letter
-                var buf bytes.Buffer
-                for unicode.IsLetter(rune(l.ch)) {
-                    buf.WriteByte(l.ch)
-                    l.readChar()
-                }
-                
-                literal := buf.String()
-                fmt.Printf("POS: %v, LITERAL: %v\n", l.position, literal)
-                tok.Type = token.IDENT
+            if token.IsIdentLetter((l.ch)) {
+                literal := l.readIdent()
+                tok.Type = token.LookupIdent(literal)
                 tok.Literal = literal
-                if literal == "let" {
-                    tok.Type = token.LET
-                }
+                fmt.Printf("POS: %v, LITERAL: %v\n", l.position, literal)
+                return tok
 
             } else if unicode.IsDigit(rune(l.ch)) {
-                // acccumulate while is digit
-                var buf bytes.Buffer
-                for unicode.IsDigit(rune(l.ch)) {
-                    buf.WriteByte(l.ch)
-                    l.readChar()
-                }
                 tok.Type = token.INT
-                tok.Literal = buf.String()
+                tok.Literal = l.readInt()
+                return tok
+
             } else {
                 tok = newToken(token.ILLEGAL, l.ch)
             }
@@ -99,11 +87,18 @@ func (l *Lexer) NextToken() token.Token {
 }
 
 func (l *Lexer) readIdent() string {
-    endPos := l.position
-    for token.IsLetter(l.input[endPos]) {
-        endPos++;
+    identStart := l.position
+    for token.IsIdentLetter(l.ch) {
+        l.readChar()
     }
-    return l.input[l.position:endPos]
+    return l.input[identStart:l.position]
 }
 
 
+func (l *Lexer) readInt() string {
+    identStart := l.position
+    for unicode.IsDigit(rune(l.ch)) {
+        l.readChar()
+    }
+    return l.input[identStart:l.position]
+}
