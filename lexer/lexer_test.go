@@ -59,6 +59,7 @@ func TestNextToken(t *testing.T) {
         {token.IDENT, "ten"},
         {token.RPAREN, ")"},
         {token.SEMICOLON, ";"},
+        {token.EOF, ""},
     }
 
 	l := New(input)

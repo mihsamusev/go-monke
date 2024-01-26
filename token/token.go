@@ -33,13 +33,20 @@ const (
 	LET      = "LET"
 )
 
-
-type Lexer struct {
+var keywords = map[string]TokenType{
+    "fn": FUNCTION,
+    "let": LET,
 }
 
-func (lexer Lexer) NextToken() Token {
-    return Token{ILLEGAL, "illegal"}
+func LookupIdent(ident string) TokenType {
+    tok, ok := keywords[ident]
+    if ok {
+        return tok
+    }
+    return IDENT
 }
-func New(input string) Lexer {
-    return Lexer{}
+
+
+func IsLetter(ch byte) bool {
+    return (ch == '_') || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
 }
