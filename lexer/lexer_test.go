@@ -6,6 +6,7 @@ import (
 	"testing"
 )
 
+
 func TestNextToken(t *testing.T) {
     input := `
         let five = 5;
@@ -22,9 +23,9 @@ func TestNextToken(t *testing.T) {
         } else {
             return false;
         }
+        10 == 10;
+        10 != 9;
         `
-        // 10 == 10;
-        // 10 != 9;
 
 	tests := []struct {
 		expectedType    token.TokenType
@@ -97,6 +98,15 @@ func TestNextToken(t *testing.T) {
         {token.SEMICOLON, ";"},
         {token.RBRACE, "}"},
 
+        {token.INT, "10"},
+        {token.EQ, "=="},
+        {token.INT, "10"},
+        {token.SEMICOLON, ";"},
+        {token.INT, "10"},
+        {token.NEQ, "!="},
+        {token.INT, "9"},
+        {token.SEMICOLON, ";"},
+
         {token.EOF, ""},
     }
 
@@ -104,7 +114,8 @@ func TestNextToken(t *testing.T) {
 
 	for i, test := range tests {
 		tok := l.NextToken()
-            fmt.Printf("pos: %v, literal: %v\n", l.position, tok.Literal)
+        fmt.Printf("pos: %v, literal: %v\n", l.position, tok.Literal)
+
 		if tok.Type != test.expectedType {
 			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q",
 				i, test.expectedType, tok.Type)

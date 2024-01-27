@@ -29,6 +29,14 @@ func (l *Lexer) readChar() {
     l.readPosition += 1;
 }
 
+func (l *Lexer) peekChar() byte {
+    c := byte(0)
+    if l.readPosition < len(l.input) {
+        c = l.input[l.readPosition]
+    }
+    return c
+}
+
 func (l *Lexer) skipWhitespace() {
     for unicode.IsSpace(rune(l.ch)) {
         l.readChar()
@@ -47,6 +55,11 @@ func (l *Lexer) NextToken() token.Token {
     switch l.ch {
         case '=':
             tok = newToken(token.ASSIGN, l.ch)
+            if l.peekChar() == '=' {
+                l.readChar()
+                tok.Type = token.EQ
+                tok.Literal = "=="
+            }
         case '+':
             tok = newToken(token.PLUS, l.ch)
         case '-':
@@ -57,6 +70,11 @@ func (l *Lexer) NextToken() token.Token {
             tok = newToken(token.SLASH, l.ch)
         case '!':
             tok = newToken(token.BANG, l.ch)
+            if l.peekChar() == '=' {
+                l.readChar()
+                tok.Type = token.NEQ
+                tok.Literal = "!="
+            }
         case '<':
             tok = newToken(token.LT, l.ch)
         case '>':
