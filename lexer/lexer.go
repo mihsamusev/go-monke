@@ -19,12 +19,7 @@ func New(input string) *Lexer {
 }
 
 func (l *Lexer) readChar() {
-    if l.readPosition >= len(l.input) {
-        l.ch = 0
-    } else {
-        l.ch = l.input[l.readPosition]
-    }
-
+    l.ch = l.peekChar()
     l.position = l.readPosition;
     l.readPosition += 1;
 }
@@ -56,9 +51,18 @@ func (l *Lexer) NextToken() token.Token {
         case '=':
             tok = newToken(token.ASSIGN, l.ch)
             if l.peekChar() == '=' {
+                first := l.ch
                 l.readChar()
                 tok.Type = token.EQ
-                tok.Literal = "=="
+                tok.Literal = string(first) + string(l.ch)
+            }
+        case '!':
+            tok = newToken(token.BANG, l.ch)
+            if l.peekChar() == '=' {
+                first := l.ch
+                l.readChar()
+                tok.Type = token.NEQ
+                tok.Literal = string(first) + string(l.ch)
             }
         case '+':
             tok = newToken(token.PLUS, l.ch)
@@ -68,13 +72,6 @@ func (l *Lexer) NextToken() token.Token {
             tok = newToken(token.ASTERISK, l.ch)
         case '/':
             tok = newToken(token.SLASH, l.ch)
-        case '!':
-            tok = newToken(token.BANG, l.ch)
-            if l.peekChar() == '=' {
-                l.readChar()
-                tok.Type = token.NEQ
-                tok.Literal = "!="
-            }
         case '<':
             tok = newToken(token.LT, l.ch)
         case '>':
