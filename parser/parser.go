@@ -109,6 +109,7 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
     statement := &ast.ReturnStatement{Token: p.curToken}
 
     // parse expression
+    p.nextToken()
     for !p.isCurToken(token.SEMICOLON) {
         p.nextToken()
     }
