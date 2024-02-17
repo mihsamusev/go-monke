@@ -7,14 +7,14 @@ import (
 )
 
 
-
-func TestIndentifierExrepssion(t *testing.T) {
+func TestIndentifierExpression(t *testing.T) {
     input := "foobar;"
 
     l := lexer.New(input)
     p := New(l)
 
     program := p.ParseProgram()
+    t.Logf("%s\n", program.String())
 
     if len(program.Statements) != 1 {
         t.Fatalf("expected 1 statement, got %d", len(program.Statements))

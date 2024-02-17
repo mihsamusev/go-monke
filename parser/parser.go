@@ -7,6 +7,17 @@ import (
 	"monke/token"
 )
 
+const (
+    _ int = iota
+    LOWEST
+    EQUALS
+    LESSGREATER
+    SUM
+    PRODUCT
+    PREFIX
+    CALL
+)
+
 type (
     prefixParseFn func() ast.Expression
     infixParseFn func(ast.Expression) ast.Expression
@@ -28,6 +39,8 @@ func New(l *lexer.Lexer) *Parser {
     p.nextToken()
     p.nextToken()
 
+    p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
+    p.registerPrefix(token.IDENT, p.parseIndentifier)
     return p
 }
 
@@ -70,7 +83,7 @@ func (p *Parser) parseStatement() ast.Statement {
     case token.RETURN:
         return p.parseReturnStatement()
     default:
-        return nil
+        return p.parseExpressionStatement()
     }
 }
 
@@ -133,3 +146,26 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
     return statement
 }
 
+func (p *Parser) parseExpressionStatement() ast.Statement {
+    statement := &ast.ExpressionStatement{Token: p.curToken}
+    statement.Expression = p.parseExpression(LOWEST)
+    
+    // semicolumns are optional in expressions
+    for p.isPeekToken(token.SEMICOLON) {
+        p.nextToken()
+    }
+
+    return statement
+}
+
+func (p *Parser) parseExpression(precedence int) ast.Expression {
+    prefix := p.prefixParseFns[p.curToken.Type]
+    if prefix == nil {
+        return nil
+    }
+    leftExp := prefix()
+    return leftExp
+}
+func (p *Parser) parseIndentifier() ast.Expression {
+    return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+}
