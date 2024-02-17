@@ -5,6 +5,7 @@ import (
 	"monke/ast"
 	"monke/lexer"
 	"monke/token"
+	"strconv"
 )
 
 const (
@@ -41,6 +42,7 @@ func New(l *lexer.Lexer) *Parser {
 
     p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
     p.registerPrefix(token.IDENT, p.parseIndentifier)
+    p.registerPrefix(token.INT, p.parseInteger)
     return p
 }
 
@@ -166,6 +168,15 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
     leftExp := prefix()
     return leftExp
 }
+
 func (p *Parser) parseIndentifier() ast.Expression {
     return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+}
+
+func (p *Parser) parseInteger() ast.Expression {
+    value, err := strconv.Atoi(p.curToken.Literal)
+    if err != nil {
+        return nil
+    }
+    return &ast.Integer{Token: p.curToken, Value: int64(value)}
 }

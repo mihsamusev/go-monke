@@ -59,15 +59,6 @@ func (ls *LetStatement) String() string {
         ls.Value.String())
 }
 
-type Identifier struct {
-    Token token.Token
-    Value string
-}
-
-func (i *Identifier) expressionNode() {}
-func (i *Identifier) TokenLiteral() string {return i.Token.Literal}
-func (ls *Identifier) String() string { return ls.Value }
-
 type ReturnStatement struct {
     Token token.Token
     Value Expression
@@ -93,3 +84,23 @@ func (es *ExpressionStatement) TokenLiteral() string { return es.Token.Literal}
 func (es *ExpressionStatement) String() string {
     return es.Expression.String()
 }
+
+
+type Identifier struct {
+    Token token.Token
+    Value string
+}
+
+func (i *Identifier) expressionNode() {}
+func (i *Identifier) TokenLiteral() string {return i.Token.Literal}
+func (i *Identifier) String() string { return i.Value }
+
+
+type Integer struct {
+    Token token.Token
+    Value int64
+}
+
+func (i *Integer) expressionNode() {}
+func (i *Integer) TokenLiteral() string {return i.Token.Literal}
+func (i *Integer) String() string { return i.Token.Literal }
