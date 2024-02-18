@@ -174,9 +174,11 @@ func (p *Parser) parseIndentifier() ast.Expression {
 }
 
 func (p *Parser) parseInteger() ast.Expression {
-    value, err := strconv.Atoi(p.curToken.Literal)
+    value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
     if err != nil {
+        e := fmt.Sprintf("Could not parse %s as int64", p.curToken.Literal)
+        p.errors = append(p.errors, e)
         return nil
     }
-    return &ast.Integer{Token: p.curToken, Value: int64(value)}
+    return &ast.Integer{Token: p.curToken, Value: value}
 }

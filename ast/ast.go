@@ -104,3 +104,27 @@ type Integer struct {
 func (i *Integer) expressionNode() {}
 func (i *Integer) TokenLiteral() string {return i.Token.Literal}
 func (i *Integer) String() string { return i.Token.Literal }
+
+type Operator struct {
+    Token token.Token
+}
+
+func (o *Operator) expressionNode() {}
+func (o *Operator) TokenLiteral() string {return o.Token.Literal}
+func (o *Operator) String() string { return o.Token.Literal }
+
+type PrefixExpression struct {
+    Token token.Token
+    Operator string
+    Right Expression
+}
+
+
+func (pe *PrefixExpression) expressionNode() {}
+func (pe *PrefixExpression) TokenLiteral() string {return pe.Token.Literal}
+func (pe *PrefixExpression) String() string {
+    return fmt.Sprintf(
+        "(%s%s)",
+        pe.Operator,
+        pe.Right.String())
+}
