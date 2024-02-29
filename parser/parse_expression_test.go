@@ -8,15 +8,21 @@ import (
 	"testing"
 )
 
+func printParserErrors(t *testing.T, p* Parser) {
+    errors := p.Errors()
 
-func TestIndentifierExpression(t *testing.T) {
+    for _, e := range errors {
+        t.Logf("%v\n", e)
+    }
+}
+
+func TestIdentifierExpression(t *testing.T) {
     input := "foobar;"
 
     l := lexer.New(input)
     p := New(l)
 
     program := p.ParseProgram()
-    t.Logf("%s\n", program.String())
 
     if len(program.Statements) != 1 {
         t.Fatalf("expected 1 statement, got %d", len(program.Statements))
@@ -32,7 +38,6 @@ func TestIntegerExpression(t *testing.T) {
     p := New(l)
 
     program := p.ParseProgram()
-    t.Logf("%s\n", program.String())
 
     if len(program.Statements) != 1 {
         t.Fatalf("expected 1 statement, got %d", len(program.Statements))
@@ -60,6 +65,7 @@ func TestPrefixExpression(t *testing.T) {
 
         program := p.ParseProgram()
         t.Logf("%s\n", program.String())
+        printParserErrors(t, p)
 
         if len(program.Statements) != 1 {
             t.Fatalf("expected 1 statement, got %d", len(program.Statements))

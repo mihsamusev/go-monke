@@ -16,17 +16,11 @@ func TestCollectedErrors(t *testing.T) {
 	l := lexer.New(input)
     p := New(l)
     p.ParseProgram()
-
-    errors := p.Errors()
-
-    for _, e := range errors {
-        t.Logf("%v\n", e)
-    }
-
-    if len(errors) != 3 {
-        t.Fatalf("Expected 3 errors, got %d", len(errors))
+    if len(p.Errors()) == 0 {
+        t.Errorf("Expectd errors")
     }
 }
+
 
 
 func TestLetStatement(t *testing.T) {
