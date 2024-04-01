@@ -23,6 +23,7 @@ func TestIdentifierExpression(t *testing.T) {
     p := New(l)
 
     program := p.ParseProgram()
+    printParserErrors(t, p)
 
     if len(program.Statements) != 1 {
         t.Fatalf("expected 1 statement, got %d", len(program.Statements))
@@ -38,6 +39,7 @@ func TestIntegerExpression(t *testing.T) {
     p := New(l)
 
     program := p.ParseProgram()
+    printParserErrors(t, p)
 
     if len(program.Statements) != 1 {
         t.Fatalf("expected 1 statement, got %d", len(program.Statements))
@@ -64,7 +66,6 @@ func TestPrefixExpression(t *testing.T) {
         p := New(l)
 
         program := p.ParseProgram()
-        t.Logf("%s\n", program.String())
         printParserErrors(t, p)
 
         if len(program.Statements) != 1 {
@@ -74,6 +75,39 @@ func TestPrefixExpression(t *testing.T) {
     }
 }
 
+type InfixTest struct {
+    input string
+    leftVal int64
+    operator string
+    rightVal int64
+}
+
+func TestInfixExpression(t *testing.T) {
+    infixTests := []InfixTest {
+        {input: "420 + 69", leftVal: 420, operator: "+", rightVal: 69},
+        {input: "420 - 69", leftVal: 420, operator: "-", rightVal: 69},
+        {input: "420 * 69", leftVal: 420, operator: "*", rightVal: 69},
+        {input: "420 / 69", leftVal: 420, operator: "/", rightVal: 69},
+        {input: "420 == 69", leftVal: 420, operator: "==", rightVal: 69},
+        {input: "420 != 69", leftVal: 420, operator: "!=", rightVal: 69},
+        {input: "420 > 69", leftVal: 420, operator: ">", rightVal: 69},
+        {input: "420 < 69", leftVal: 420, operator: "<", rightVal: 69},
+    }
+    
+    for _, test := range infixTests {
+        l := lexer.New(test.input)
+        p := New(l)
+
+        program := p.ParseProgram()
+        printParserErrors(t, p)
+
+        if len(program.Statements) != 1 {
+            t.Fatalf("expected 1 statement, got %d", len(program.Statements))
+        }
+        t.Logf("%v", program.Statements[0])
+        assertInfixExpr(t, program.Statements[0], test)
+    }
+}
 
 func assertIsExpressionType(t *testing.T, statement ast.Statement, expected ast.Expression) {
     s, ok := statement.(*ast.ExpressionStatement)
@@ -151,4 +185,26 @@ func assertPrefixExpr(t *testing.T, statement ast.Statement, test PrefixTest) {
 
     assertIntegerExpr(
         t, exp.Right, test.value)
+}
+
+func assertInfixExpr(t *testing.T, statement ast.Statement, test InfixTest) {
+    s, ok := statement.(*ast.ExpressionStatement)
+    if !ok {
+        t.Fatalf("expected ast.ExpressionStatement, got %T", statement)
+    }
+
+    exp, ok := s.Expression.(*ast.InfixExpression)
+    if !ok {
+        t.Fatalf("expected ast.InfixExpression, got %T", s.Expression)
+    }
+
+    assertIntegerExpr(
+        t, exp.Left, test.leftVal)
+
+    if exp.Operator != test.operator {
+        t.Fatalf("expected operator %s, got %s", test.operator, exp.Operator)
+    }
+
+    assertIntegerExpr(
+        t, exp.Right, test.rightVal)
 }
