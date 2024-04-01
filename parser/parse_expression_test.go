@@ -109,6 +109,39 @@ func TestInfixExpression(t *testing.T) {
     }
 }
 
+func TestOperatorPrecedence(t *testing.T) {
+    tests := []struct {
+        input string
+        expected string
+    }{
+        { "-a * b", "((-a) * b)" },
+        { "!-a", "(!(-a))" },
+        { "a + b + c", "((a + b) + c)", },
+        { "a + b - c", "((a + b) - c)", },
+        { "a * b * c", "((a * b) * c)", },
+        { "a * b / c", "((a * b) / c)", },
+        { "a + b / c", "(a + (b / c))", },
+        { "a + b * c + d / e - f", "(((a + (b * c)) + (d / e)) - f)", },
+        { "3 + 4; -5 * 5", "(3 + 4)((-5) * 5)", },
+        { "5 > 4 == 3 < 4", "((5 > 4) == (3 < 4))", },
+        { "5 < 4 != 3 > 4", "((5 < 4) != (3 > 4))", },
+        { "3 + 4 * 5 == 3 * 1 + 4 * 5", "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))", },
+    }
+
+    for _, test := range tests {
+        l := lexer.New(test.input)
+        p := New(l)
+
+        program := p.ParseProgram()
+        printParserErrors(t, p)
+
+        actual := program.String()
+        t.Logf("%v", actual) 
+        if actual != test.expected {
+            t.Errorf("Expected string: '%q' got '%q'", test.expected, actual)
+        }
+    }
+}
 func assertIsExpressionType(t *testing.T, statement ast.Statement, expected ast.Expression) {
     s, ok := statement.(*ast.ExpressionStatement)
     if !ok {

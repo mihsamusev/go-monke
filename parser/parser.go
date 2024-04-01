@@ -19,7 +19,7 @@ const (
     CALL
 )
 
-var precedences = map[token.TokenType]int {
+var priorities = map[token.TokenType]int {
     token.EQ: EQUALS,
     token.NEQ: EQUALS,
     token.LT: LESSGREATER,
@@ -140,15 +140,15 @@ func (p *Parser) isCurToken(t token.TokenType) bool {
     return p.curToken.Type == t
 }
 
-func (p *Parser) peekPrecedence() int {
-    if pr, ok := precedences[p.peekToken.Type]; ok {
+func (p *Parser) peekPriority() int {
+    if pr, ok := priorities[p.peekToken.Type]; ok {
         return pr
     }
     return LOWEST
 }
 
-func (p *Parser) curPrecedence() int {
-    if pr, ok := precedences[p.curToken.Type]; ok {
+func (p *Parser) curPriority() int {
+    if pr, ok := priorities[p.curToken.Type]; ok {
         return pr
     }
     return LOWEST
@@ -202,7 +202,7 @@ func (p *Parser) parseExpressionStatement() ast.Statement {
     return statement
 }
 
-func (p *Parser) parseExpression(precedence int) ast.Expression {
+func (p *Parser) parseExpression(priority int) ast.Expression {
     prefix := p.prefixParseFns[p.curToken.Type]
     if prefix == nil {
         p.addNoPrefixParseFnError(p.curToken.Type)
@@ -210,7 +210,10 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
     }
     leftExp := prefix()
 
-    for !p.isPeekToken(token.SEMICOLON) && precedence < p.peekPrecedence() {
+    // i came from 'priority' expression,
+    // if the next one is higher priority, we start a recursion where
+    // im left for next one, else, next one is my right.
+    for !p.isPeekToken(token.SEMICOLON) && priority < p.peekPriority() {
         infix := p.infixParseFns[p.peekToken.Type]
         if infix == nil {
             return leftExp
@@ -240,10 +243,12 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
         Operator: p.curToken.Literal,
         Left: left,
     }
-    precedence := p.curPrecedence()
+    priority := p.curPriority()
     p.nextToken()
-
-    expression.Right = p.parseExpression(precedence)
+    
+    // gonna parse right expression, but if its
+    // made of higher priority operators, will return
+    expression.Right = p.parseExpression(priority)
     return expression
 }
 
